@@ -18,12 +18,13 @@
 import {Array1D, NDArray, NDArrayMath, Scalar} from 'deeplearn';
 import {PredictionModel} from './prediction_model';
 
-const MODEL_FILE_URL = 'mobilenet_v1_0.75_224/optimized_graph.pb';
+const MODEL_FILE_URL = 'mobilenet_v1_0.75_224/kera_mobilenet.pb';
 export class MobileNet extends PredictionModel {
   // yolo variables
   private PREPROCESS_DIVISOR = Scalar.new(255.0 / 2);
 
-  constructor(math: NDArrayMath, url?: string) {
+  constructor(
+      math: NDArrayMath, private inputNodeName = 'input', url?: string) {
     super(math, url || MODEL_FILE_URL);
   }
 
@@ -41,6 +42,8 @@ export class MobileNet extends PredictionModel {
         this.PREPROCESS_DIVISOR);
     const reshapedInput =
         preprocessedInput.reshape([1, ...preprocessedInput.shape]);
-    return super.predict(undefined, {'input': reshapedInput}) as Array1D;
+    const dict: {[key: string]: NDArray} = {};
+    dict[this.inputNodeName] = reshapedInput;
+    return super.predict(undefined, dict) as Array1D;
   }
 }

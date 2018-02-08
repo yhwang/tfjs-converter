@@ -231,12 +231,42 @@ export function performMathOp(
       return math.subtract(inputs[0], inputs[1]);
     }
 
+    case 'Exp': {
+      return math.exp(input as NDArray);
+    }
     case 'Relu':
       return math.relu(input as NDArray);
 
     case 'Relu6':
       return math.clip(input as NDArray, 0, 6);
 
+    case 'Minimum': {
+      const inputs = input as NDArray[];
+      return math.minimum(inputs[0], inputs[1]);
+    }
+    case 'Maximum': {
+      const inputs = input as NDArray[];
+      return math.maximum(inputs[0], inputs[1]);
+    }
+    case 'Max': {
+      const inputs = input as NDArray[];
+      const axis = Array.prototype.slice.call(inputs[1].dataSync());
+      const keepDims = getBoolParam(node.attr, 'keep_dims', false);
+      return math.max(inputs[0], axis, keepDims);
+    }
+    case 'Mean': {
+      const inputs = input as NDArray[];
+      const axis = Array.prototype.slice.call(inputs[1].dataSync());
+      return math.mean(inputs[0], axis);
+    }
+    case 'Shape': {
+      return Array1D.new((input as NDArray).shape, 'int32');
+    }
+    case 'Transpose': {
+      const inputs = input as NDArray[];
+      const perms = Array.prototype.slice.call(inputs[1].dataSync());
+      return math.transpose(inputs[0], perms);
+    }
     case 'Rsqrt':
       return math.divide(
           Scalar.new(1.0, 'float32'), math.sqrt(input as NDArray));
