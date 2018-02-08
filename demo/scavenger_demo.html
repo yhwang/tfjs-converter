@@ -12,50 +12,71 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================-->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0">
 
-<script src="https://unpkg.com/deeplearn"></script>
-<script src="dist/bundle.js"></script>
+<h1>📺 ⌨️ 📚 📱 👖 🎧 🚗 🔑 </h1>
 
-<img id="elephant"></img>
+<video id="video" class="video" width="227" height="227" autoplay playsinline></video>
+
 <div id="result"></div>
 
+<script src="dist/bundle.js"></script>
+<script src="https://unpkg.com/deeplearn@0.3.12"></script>
 <script>
-  const elephant = document.getElementById('elephant');
-  elephant.onload = async () => {
-    const resultElement = document.getElementById('result');
 
-    resultElement.innerText = 'Loading mobilenet tensorflow model...';
+  let tfModel;
+  const setupCamera = async () => {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        'audio': false,
+        'video': {facingMode: 'environment'}
+      });
+      window.stream = stream;
+      videoElement.srcObject = stream;
+      return navigator.mediaDevices.enumerateDevices();
+    }
+  }
 
+  const animate = async () => {
+    await math.scope(async (keep, track) => {
+      const pixels = track(dl.Array3D.fromPixels(videoElement));
+      const result = await mobileNet.predict(pixels);
+      const topK = await mobileNet.getTopKClasses(result, 5);
+      resultElement.innerText = '';
+      for (const key in topK) {
+        resultElement.innerText += `${topK[key].toFixed(5)}: ${key}\n`;
+      }
+    });
+
+    requestAnimationFrame(() => animate());
+  }
+
+    const result = document.getElementById('result');
+    result.onload = async () => {
     // If dl isn't loaded, wait 1 second.
     if (dl == null) {
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
-
     const math = dl.ENV.math;
     const tfModel = new tfdemo.MobileNet(math, 'mobilenet_v1_0.75_224/graph.pb');
     tfModel.setLabels(tfdemo.SCAVENGER_LABELS);
-    console.time('load');
     await tfModel.load();
-    console.timeEnd('load');
+    }
 
-    resultElement.innerText = 'Predicting...';
+  const init = async () => {
+    if (window.stream) {
+      window.stream.getTracks().forEach((track) => {
+        track.stop();
+      });
+    }
 
-    const pixels = dl.Array3D.fromPixels(elephant);
+    await setupCamera();
 
-    console.time('predict');
-    const result = tfModel.predict(pixels);
-    console.timeEnd('predict');
+    requestAnimationFrame(() => animate());
+  }
 
-    console.time('predict 2');
-    tfModel.predict(pixels).dataSync();
-    console.timeEnd('predict 2');
+  init();
 
-    resultElement.innerText = '';
 
-    const topK = await tfModel.getTopKClasses(result, 5);
-    for (const key in topK) {
-      resultElement.innerText += `${topK[key].toFixed(5)}: ${key}\n`;
-    };
-  };
-  elephant.src = 'resize_book.jpg';
 </script>
