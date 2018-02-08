@@ -27,6 +27,7 @@ limitations under the License.
   const videoElement = document.getElementById('video');
   const resultElement = document.getElementById('result');
   let tfModel;
+  let math;
   const setupCamera = async () => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -59,8 +60,8 @@ limitations under the License.
     if (dl == null) {
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
-    const math = dl.ENV.math;
-    const tfModel = new tfdemo.MobileNet(math, 'mobilenet_v1_0.75_224/graph.pb');
+    math = dl.ENV.math;
+    tfModel = new tfdemo.MobileNet(math, 'mobilenet_v1_0.75_224/graph.pb');
     tfModel.setLabels(tfdemo.SCAVENGER_LABELS);
     await tfModel.load();
     }
