@@ -32,7 +32,8 @@ limitations under the License.
     }
 
     const math = dl.ENV.math;
-    const tfModel = new tfdemo.MobileNet(math, 'input_1_1');
+    const tfModel = new tfdemo.MobileNet(
+      math, 'input_1_1', 'mobilenet_v1_0.75_224/kera_mobilenet.pb');
     console.time('load');
     await tfModel.load();
     console.timeEnd('load');

@@ -54,8 +54,7 @@ limitations under the License.
     requestAnimationFrame(() => animate());
   }
 
-    const result = document.getElementById('result');
-    result.onload = async () => {
+  videoElement.onload = async () => {
     // If dl isn't loaded, wait 1 second.
     if (dl == null) {
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -64,7 +63,8 @@ limitations under the License.
     tfModel = new tfdemo.MobileNet(math, 'mobilenet_v1_0.75_224/graph.pb');
     tfModel.setLabels(tfdemo.SCAVENGER_LABELS);
     await tfModel.load();
-    }
+    requestAnimationFrame(() => animate());
+  }
 
   const init = async () => {
     if (window.stream) {
@@ -72,12 +72,8 @@ limitations under the License.
         track.stop();
       });
     }
-
     await setupCamera();
-
-    requestAnimationFrame(() => animate());
   }
-
   init();
 
 
