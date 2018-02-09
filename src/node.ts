@@ -35,6 +35,13 @@ export function getBoolParam(
   return param ? param.b : def;
 }
 
+export function getFloatParam(
+    attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
+    def: number): number {
+  const param = attrs[name];
+  return param ? param.f : def;
+}
+
 export function getTensorParam(
     attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
     def?: tensorflow.ITensor): tensorflow.ITensor|undefined {
@@ -258,6 +265,14 @@ export function performMathOp(
       const inputs = input as NDArray[];
       const axis = Array.prototype.slice.call(inputs[1].dataSync());
       return math.mean(inputs[0], axis);
+    }
+    case 'FusedBatchNorm': {
+      const inp = input as NDArray[];
+
+      return math.batchNormalization4D(
+          inp[0] as Array4D, inp[3] as Array1D, inp[4] as Array1D,
+          getFloatParam(node.attr, 'epislon', 0), inp[1] as Array1D,
+          inp[2] as Array1D);
     }
     case 'Shape': {
       return Array1D.new((input as NDArray).shape, 'int32');

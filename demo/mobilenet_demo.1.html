@@ -33,21 +33,22 @@ limitations under the License.
 
     const math = dl.ENV.math;
     const tfModel = new tfdemo.MobileNet(
-      math, 'input_1_1', 'mobilenet_v1_0.75_224/kera_mobilenet.pb');
+      math, 'X', 'mobilenet_v1_0.75_224/nazoru-mobilenet.pb');
     console.time('load');
     await tfModel.load();
     console.timeEnd('load');
 
     resultElement.innerText = 'Predicting...';
 
-    const pixels = dl.Array3D.fromPixels(elephant);
+    //const pixels = dl.Array3D.fromPixels(elephant);
 
+    const input = dl.Array3D.zeros([16, 16, 8], 'float32');
     console.time('predict');
-    const result = tfModel.predict(pixels);
+    const result = tfModel.predict(input);
     console.timeEnd('predict');
 
     console.time('predict 2');
-    tfModel.predict(pixels).dataSync();
+    tfModel.predict(input).dataSync();
     console.timeEnd('predict 2');
 
     resultElement.innerText = '';
