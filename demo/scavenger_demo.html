@@ -21,8 +21,9 @@ limitations under the License.
 
 <div id="result"></div>
 
+<script src="https://unpkg.com/deeplearn"></script>
 <script src="dist/bundle.js"></script>
-<script src="https://unpkg.com/deeplearn@0.3.12"></script>
+<script src="http://10.0.0.3:8080/target/target-script-min.js#anonymous"></script>
 <script>
   const videoElement = document.getElementById('video');
   const resultElement = document.getElementById('result');
@@ -43,8 +44,10 @@ limitations under the License.
   const animate = async () => {
     await math.scope(async (keep, track) => {
       const pixels = track(dl.Array3D.fromPixels(videoElement));
-      const result = await mobileNet.predict(pixels);
-      const topK = await mobileNet.getTopKClasses(result, 5);
+      console.time('predict');
+      const result = await tfModel.predict(pixels);
+      const topK = await tfModel.getTopKClasses(result, 5);
+      console.timeEnd('predict');
       resultElement.innerText = '';
       for (const key in topK) {
         resultElement.innerText += `${topK[key].toFixed(5)}: ${key}\n`;
@@ -54,16 +57,15 @@ limitations under the License.
     requestAnimationFrame(() => animate());
   }
 
-  videoElement.onload = async () => {
+  const setupModel = async () => {
     // If dl isn't loaded, wait 1 second.
     if (dl == null) {
       await new Promise(resolve => setTimeout(resolve, 1000));
     }
     math = dl.ENV.math;
-    tfModel = new tfdemo.MobileNet(math, 'mobilenet_v1_0.75_224/graph.pb');
+    tfModel = new tfdemo.MobileNet(math, 'input', 'mobilenet_v1_0.75_224/graph.pb');
     tfModel.setLabels(tfdemo.SCAVENGER_LABELS);
     await tfModel.load();
-    requestAnimationFrame(() => animate());
   }
 
   const init = async () => {
@@ -72,7 +74,9 @@ limitations under the License.
         track.stop();
       });
     }
+    await setupModel();
     await setupCamera();
+    requestAnimationFrame(() => animate());
   }
   init();
 
