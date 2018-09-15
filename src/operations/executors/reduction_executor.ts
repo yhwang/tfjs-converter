@@ -60,6 +60,14 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
           getParamValue('x', node, tensorMap, context) as tfc.Tensor, axis,
           keepDims)];
     }
+    case 'prod': {
+      const axis = getParamValue('axis', node, tensorMap, context) as number[];
+      const keepDims =
+          getParamValue('keepDims', node, tensorMap, context) as boolean;
+      return [tfc.prod(
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor, axis,
+          keepDims)];
+    }
     case 'all': {
       const axis = getParamValue('axis', node, tensorMap, context) as number[];
       const keepDims =
